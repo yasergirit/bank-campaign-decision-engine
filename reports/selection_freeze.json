@@ -1,0 +1,51 @@
+{
+  "run_id": "comparison-v1",
+  "selected_model": "lightgbm_small",
+  "selection_rule": "validation_average_precision_desc_then_brier_asc_then_name",
+  "scenario": {
+    "capacity": 500,
+    "cost": 3.0,
+    "value": 100.0
+  },
+  "scenario_modes": [
+    "capacity",
+    "positive_value"
+  ],
+  "business_rule": "prior_success_desc_then_previous_desc_then_row_id_asc",
+  "random_repetitions": 200,
+  "seed": 42,
+  "source_code_sha256": {
+    "src/bank_campaign/data/download.py": "969843a2bc209a095539dcf74f67724564260ced0a469b5531a344edd399684f",
+    "src/bank_campaign/data/validate.py": "26b72d3945a87556c3b89c834afdbb14abb9350a617f0e51b86d85b931ed262c",
+    "src/bank_campaign/data/schema.py": "6a4f95e5640f782955d95a3b81bf8372fa26ef4d6b876ca0e6f9738a4a3b5848",
+    "src/bank_campaign/data/split.py": "982226a8fc546a28efa1f68f12aa5a11d448e5a2672d14fda2f4f6f6fc613efd",
+    "src/bank_campaign/features.py": "dc7c6e7f8ce5a9114e52f57e8c4b1e73f6e898d3f69cd63302025a3abaff4b39",
+    "src/bank_campaign/evaluate.py": "46743be2db2ac31fa59221d4e4a7e27a7b20adce0e3a5f2f3ab783a2b2cf6e4d",
+    "src/bank_campaign/policy.py": "f9fbd4768a5d2ef7d63bc91b0bd155533044555a93267c7a5db60e5936a1a8bf",
+    "src/bank_campaign/comparison.py": "58be8470356f4c27d081a20748b7c1989a130504def10ba2622ae1750f26e82b",
+    "src/bank_campaign/holdout.py": "d212553a3d42ed5d16cb67cebca60263dd90302f049308c15cd2d16f9884f43b",
+    "src/bank_campaign/campaign.py": "0c1592cb595b282903e781fc4b172572810890ac364b4e6d6f031b054e82270c",
+    "configs/comparison.json": "18d8fbfb8be087a812664d96af7b338f01297f1a1982ac2202f927b7d4523154",
+    "uv.lock": "5d743ea81533e171c76af3a9dca2576a96fd560d0bed10ed41fdf5ccc4e70f98"
+  },
+  "source_csv_sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+  "split_assignment_sha256": "56dded47e041b5046d859c3877831b96f27ac98b86a71ad4574b9ca7a337fd1e",
+  "selected_model_path": "artifacts/comparison-v1/selected_model.pkl",
+  "selected_model_sha256": "5db3a7f63ce1ae99f5042f5c81c44c3cd9c314fc2c0471d120431e46c9f71354",
+  "selected_validation_predictions_sha256": "29beb33ae73cf510bdaa241ef8256031c2a8912c509f284d830f2616ed209aa3",
+  "comparison_manifest_sha256": "a5d3b1d304aa2329c332c9e83d2f2d3dcced6306cb38b5b7b4f191faa4e82900",
+  "dummy_training_probability": 0.048087431693989074,
+  "features": [
+    "age",
+    "job",
+    "marital",
+    "education",
+    "default",
+    "housing",
+    "loan",
+    "previous",
+    "poutcome"
+  ],
+  "test_was_evaluated_at_freeze": false,
+  "policy_note": "No retraining or tuning follows the test release in this experiment."
+}

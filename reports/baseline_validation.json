@@ -1,0 +1,67 @@
+{
+  "run_id": "baseline-v1",
+  "features": [
+    "age",
+    "job",
+    "marital",
+    "education",
+    "default",
+    "housing",
+    "loan",
+    "previous",
+    "poutcome"
+  ],
+  "source_csv_sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+  "split_assignment_sha256": "56dded47e041b5046d859c3877831b96f27ac98b86a71ad4574b9ca7a337fd1e",
+  "uv_lock_sha256": "329aea2d7b7f27bcbfdc0520841a6b41a24e5adf619a6b61e0f4d6dec584d4fc",
+  "source_code_sha256": {
+    "src/bank_campaign/data/split.py": "982226a8fc546a28efa1f68f12aa5a11d448e5a2672d14fda2f4f6f6fc613efd",
+    "src/bank_campaign/data/schema.py": "6a4f95e5640f782955d95a3b81bf8372fa26ef4d6b876ca0e6f9738a4a3b5848",
+    "src/bank_campaign/features.py": "dc7c6e7f8ce5a9114e52f57e8c4b1e73f6e898d3f69cd63302025a3abaff4b39",
+    "src/bank_campaign/evaluate.py": "46743be2db2ac31fa59221d4e4a7e27a7b20adce0e3a5f2f3ab783a2b2cf6e4d",
+    "src/bank_campaign/train.py": "ffd86099aead98b4c65fe2923a76d0da589bf1b82731433747c23e691b135023"
+  },
+  "versions": {
+    "python": "3.12.11",
+    "pandas": "3.0.6",
+    "sklearn": "1.9.1"
+  },
+  "train_records": 24705,
+  "validation_records": 8235,
+  "train_positive_rate": 0.048087431693989074,
+  "validation_positive_rate": 0.11074681238615665,
+  "logistic_config": {
+    "C": 1.0,
+    "class_weight": null,
+    "dual": false,
+    "fit_intercept": true,
+    "intercept_scaling": 1,
+    "l1_ratio": 0.0,
+    "max_iter": 1000,
+    "n_jobs": null,
+    "penalty": "deprecated",
+    "random_state": 42,
+    "solver": "lbfgs",
+    "tol": 0.0001,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "results": [
+    {
+      "model": "dummy_prior",
+      "evaluation_split": "validation",
+      "average_precision": 0.11074681238615665,
+      "roc_auc": 0.5,
+      "brier_score": 0.10240815392118806
+    },
+    {
+      "model": "logistic_regression",
+      "evaluation_split": "validation",
+      "average_precision": 0.14842300975035688,
+      "roc_auc": 0.5724218755614969,
+      "brier_score": 0.10196463054751871
+    }
+  ],
+  "test_evaluated": false,
+  "calibration": "none; fixed unweighted logistic regression baseline"
+}

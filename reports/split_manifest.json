@@ -1,0 +1,48 @@
+{
+  "policy": "source_order_60_20_20_first_predictor_occurrence_v1",
+  "source_csv_sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+  "row_id_definition": "zero-based original CSV record position, excluding header",
+  "duplicate_key": [
+    "age",
+    "job",
+    "marital",
+    "education",
+    "default",
+    "housing",
+    "loan",
+    "contact",
+    "month",
+    "day_of_week",
+    "duration",
+    "campaign",
+    "pdays",
+    "previous",
+    "poutcome",
+    "emp.var.rate",
+    "cons.price.idx",
+    "cons.conf.idx",
+    "euribor3m",
+    "nr.employed"
+  ],
+  "duplicate_policy": "retain earliest identical predictor row; exclude later occurrences",
+  "assignment_sha256": "56dded47e041b5046d859c3877831b96f27ac98b86a71ad4574b9ca7a337fd1e",
+  "counts": {
+    "train": {
+      "assigned": 24712,
+      "retained": 24705,
+      "excluded_duplicates": 7
+    },
+    "validation": {
+      "assigned": 8238,
+      "retained": 8235,
+      "excluded_duplicates": 3
+    },
+    "test": {
+      "assigned": 8238,
+      "retained": 8236,
+      "excluded_duplicates": 2
+    }
+  },
+  "test_status": "reserved; not evaluated in Stage 3",
+  "limitations": "Source order, not exact dates; customer identity is unavailable."
+}

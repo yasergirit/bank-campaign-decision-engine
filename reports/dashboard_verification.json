@@ -1,0 +1,60 @@
+{
+  "verified_at_utc": "2026-10-17T09:51:50.173991+00:00",
+  "ui_url": "http://127.0.0.1:8502",
+  "api_url": "http://127.0.0.1:8000",
+  "versions": {
+    "streamlit": "1.66.0",
+    "fastapi": "0.143.3",
+    "pydantic": "2.14.1",
+    "pandas": "3.0.6",
+    "numpy": "2.5.4"
+  },
+  "source_sha256": {
+    "app/streamlit_app.py": "483903f441e21f92b56f779eea16b1f83a671b63da6225f45fcd23c490887d46",
+    "src/bank_campaign/dashboard.py": "c5d0f2f62f1d67396fbb03610e786eaba65663bf8aeb6c180b4bd15bf619914a",
+    "requirements-ui.lock": "aff3dda93de03bc6c8c7b098dacab4eb3c5be22a6eba0cc0d2cad3c889eaece3",
+    ".streamlit/config.toml": "39105e68f5d10a07111342684e130ee5d75605014b2ae2275d28cc3c5ddcf749"
+  },
+  "checks": {
+    "frozen_ml_inputs_unchanged": true,
+    "live_api_ready": true,
+    "live_streamlit_health": true,
+    "browser_sample_selection": [
+      2,
+      1
+    ],
+    "browser_download_exact_api_parity": true,
+    "browser_download_rows": [
+      {
+        "row_id": "2",
+        "subscription_probability": "0.05685187651682765",
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1",
+        "expected_net_value": "2.6851876516827655"
+      },
+      {
+        "row_id": "1",
+        "subscription_probability": "0.05319676610955741",
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1",
+        "expected_net_value": "2.3196766109557414"
+      }
+    ],
+    "desktop_and_390px_visual_check": "Passed after one layout correction: stacked policy choices, wrapping summary, scrollable version/table",
+    "mechanical_design_detector": "no findings"
+  },
+  "tests": {
+    "full_suite_db_enabled_passed": 268,
+    "ui_flow_tests_passed_after_final_layout_changes": 8,
+    "ruff_check": "passed",
+    "ruff_format": "33 files passed before layout; final app format passes",
+    "mypy": "21 source/app files passed",
+    "uv_lock_check": "passed",
+    "git_diff_check": "passed",
+    "known_warning": "Existing Starlette TestClient deprecation for HTTPX; tests pass."
+  },
+  "limits": {
+    "upload_bytes": 2097152,
+    "rows": 10000
+  },
+  "interpretation": "Expected values use uncalibrated probabilities and assumptions. Historical reports are separate; no observed uploaded-candidate metrics, retraining or new holdout evaluation.",
+  "review": "Native design/functional review completed in root after interrupted subagent could not reopen; no replacement agent spawned."
+}

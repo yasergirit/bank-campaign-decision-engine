@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Yerel ayarlar
+.idea/
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Veri ve model çıktıları
+data/raw/
+data/processed/
+artifacts/
+
+# Kontrol araçlarının önbellekleri
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Intermediate acquisition/debug files
+work/
+
+# Agent-local plans/state are not portfolio source.
+.omx/
+
+# Original PyCharm starter, retained locally; not an application entry point.
+/main.py

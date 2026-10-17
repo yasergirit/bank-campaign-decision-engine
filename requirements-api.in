@@ -1,0 +1,7 @@
+# Optional HTTP-serving component. ML dependencies remain locked in uv.lock.
+fastapi>=0.115,<1
+pydantic>=2.10,<3
+uvicorn>=0.30,<1
+httpx>=0.27,<1
+# Match the existing project environment's shared typing dependency.
+typing-extensions==4.16.0

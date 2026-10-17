@@ -1,0 +1,44 @@
+{
+  "records": [
+    {
+      "row_id": 1,
+      "age": 35,
+      "job": "technician",
+      "marital": "married",
+      "education": "university.degree",
+      "default": "no",
+      "housing": "yes",
+      "loan": "no",
+      "previous": 0,
+      "poutcome": "nonexistent"
+    },
+    {
+      "row_id": 2,
+      "age": 58,
+      "job": "retired",
+      "marital": "married",
+      "education": "high.school",
+      "default": "no",
+      "housing": "no",
+      "loan": "no",
+      "previous": 1,
+      "poutcome": "success"
+    },
+    {
+      "row_id": 3,
+      "age": 27,
+      "job": "services",
+      "marital": "single",
+      "education": "high.school",
+      "default": "unknown",
+      "housing": "yes",
+      "loan": "no",
+      "previous": 1,
+      "poutcome": "failure"
+    }
+  ],
+  "capacity": 2,
+  "cost": 3.0,
+  "value": 100.0,
+  "mode": "capacity"
+}

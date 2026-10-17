@@ -1,0 +1,24 @@
+{
+  "run_id": "comparison-v1",
+  "selection_rule": "validation_average_precision_desc_then_brier_asc_then_name",
+  "seed": 42,
+  "random_repetitions": 200,
+  "capacities": [100, 500, 1000],
+  "scenario": {"capacity": 500, "cost": 3.0, "value": 100.0},
+  "business_rule": "prior_success_desc_then_previous_desc_then_row_id_asc",
+  "lightgbm_candidates": [
+    {"name": "lightgbm_small", "num_leaves": 7, "n_estimators": 100},
+    {"name": "lightgbm_medium", "num_leaves": 15, "n_estimators": 100},
+    {"name": "lightgbm_long", "num_leaves": 15, "n_estimators": 200}
+  ],
+  "lightgbm_common": {
+    "learning_rate": 0.05,
+    "min_child_samples": 50,
+    "reg_lambda": 1.0,
+    "random_state": 42,
+    "n_jobs": 1,
+    "deterministic": true,
+    "force_col_wise": true,
+    "verbosity": -1
+  }
+}

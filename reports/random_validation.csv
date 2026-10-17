@@ -1,0 +1,4 @@
+capacity,selected_count,repetitions,seed,observed_mean,observed_p05,observed_p95
+100,100,200,42,11.02,5.0,17.0
+500,500,200,42,54.975,44.0,68.0
+1000,1000,200,42,110.515,96.9,125.0

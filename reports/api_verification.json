@@ -1,0 +1,92 @@
+{
+  "base_url": "http://127.0.0.1:8000",
+  "packages": {
+    "fastapi": "0.143.3",
+    "pydantic": "2.14.1",
+    "uvicorn": "0.54.0",
+    "httpx": "0.28.1"
+  },
+  "checks": {
+    "/health": 200,
+    "/model-info": 200,
+    "/docs": 200,
+    "/openapi.json": 200,
+    "reject_y": 422,
+    "reject_duration": 422,
+    "sql_training_rows_api_pipeline_parity": {
+      "row_ids": [
+        0,
+        1,
+        2
+      ],
+      "matched": true
+    },
+    "frozen_ml_inputs_unchanged": true
+  },
+  "score_example": {
+    "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1",
+    "records": [
+      {
+        "row_id": 1,
+        "subscription_probability": 0.05319676610955741,
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1"
+      },
+      {
+        "row_id": 2,
+        "subscription_probability": 0.05685187651682765,
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1"
+      },
+      {
+        "row_id": 3,
+        "subscription_probability": 0.051215602134573865,
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1"
+      }
+    ]
+  },
+  "campaign_example": {
+    "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1",
+    "selected": [
+      {
+        "row_id": 2,
+        "subscription_probability": 0.05685187651682765,
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1",
+        "expected_net_value": 2.6851876516827655
+      },
+      {
+        "row_id": 1,
+        "subscription_probability": 0.05319676610955741,
+        "model_version": "comparison-v1:lightgbm_small:5db3a7f63ce1",
+        "expected_net_value": 2.3196766109557414
+      }
+    ],
+    "summary": {
+      "selected_count": 2,
+      "expected_subscriptions": 0.11004864262638506,
+      "assumed_cost": 6.0,
+      "assumed_net_value": 5.004864262638507
+    },
+    "interpretation": "Expected values use model probabilities and user assumptions; they are not observed conversions or achieved profit."
+  },
+  "api_lock_sha256": "39a22784db08d084b3725f9ad2b5521c1955877b2be2dd5d646f1f17f17e292e",
+  "model_artifact_sha256": "5db3a7f63ce1ae99f5042f5c81c44c3cd9c314fc2c0471d120431e46c9f71354",
+  "notes": "Synthetic samples and first three training feature rows only. No retraining, holdout scoring or performance recomputation.",
+  "verified_at_utc": "2026-10-17T09:43:06.400531+00:00",
+  "serving_source_sha256": {
+    "src/bank_campaign/api.py": "a45672a7475b9b5bb225721ba41882094632ab114f27863e9d3e21fe4c45e4bd",
+    "src/bank_campaign/predict.py": "57dea6103a5d2d52385b4c6f052807544555cb9a8a706721b59c2228e649cd1e",
+    "src/bank_campaign/schemas.py": "1a04ef97e8474113abc406ea5a05223cf9bc418d42101ba3cdd25ce6b3575a97"
+  },
+  "validation": {
+    "pytest_db_enabled": {
+      "passed": 238,
+      "warnings": 1,
+      "warning": "Starlette TestClient deprecates HTTPX; existing tests remain passing."
+    },
+    "ruff_check": "passed",
+    "ruff_format_check": "29 files unchanged",
+    "mypy": "19 source files passed",
+    "uv_lock_check": "passed",
+    "git_diff_check": "passed",
+    "review_fix": "Removed restoration hash fallback; forged-restoration regression passes before unpickling."
+  }
+}

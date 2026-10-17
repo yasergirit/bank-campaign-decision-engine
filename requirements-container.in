@@ -1,0 +1,3 @@
+# Linux-only supplement for Streamlit's declared non-Darwin runtime dependency.
+-c requirements-ui.lock
+watchdog>=2.1.5,<7

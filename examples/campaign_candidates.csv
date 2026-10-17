@@ -1,0 +1,4 @@
+﻿row_id,age,job,marital,education,default,housing,loan,previous,poutcome
+1,35,technician,married,university.degree,no,yes,no,0,nonexistent
+2,58,retired,married,high.school,no,no,no,1,success
+3,27,services,single,high.school,unknown,yes,no,1,failure

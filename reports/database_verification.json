@@ -1,0 +1,47 @@
+{
+  "raw_rows": 41188,
+  "raw_payload_parity_passed": true,
+  "feature_rows": 41188,
+  "feature_columns": [
+    "age",
+    "job",
+    "marital",
+    "education",
+    "default",
+    "housing",
+    "loan",
+    "previous",
+    "poutcome"
+  ],
+  "split_counts": [
+    {
+      "split": "test",
+      "assigned": 8238,
+      "retained": 8236,
+      "excluded": 2
+    },
+    {
+      "split": "train",
+      "assigned": 24712,
+      "retained": 24705,
+      "excluded": 7
+    },
+    {
+      "split": "validation",
+      "assigned": 8238,
+      "retained": 8235,
+      "excluded": 3
+    }
+  ],
+  "parity_passed": true,
+  "source_csv_sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+  "split_assignment_sha256": "56dded47e041b5046d859c3877831b96f27ac98b86a71ad4574b9ca7a337fd1e",
+  "schema_sha256": "b81d97e772d4a455c7b73f47a45da97aba1f69a77ec79677dcd8770816509cb0",
+  "views_sha256": "6c802534aea57b4c4e97aa7fe94731e29691f6614ca16644478a47825e42bfb1",
+  "repeat_load_preserved_provenance": true,
+  "postgres_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+  "compose_sha256": "4bd16e29741096a934bd29798dc4e226534920325b09b07bce96e86e10accd35",
+  "loader_sha256": "92cf2116348fb970cde7b9a5a4a77be4e0bd7ea0fb6059cd037ce8fc5480ed56",
+  "image": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+  "model_scoring_performed": false
+}

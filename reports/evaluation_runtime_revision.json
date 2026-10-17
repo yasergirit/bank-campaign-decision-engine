@@ -1,0 +1,9 @@
+{
+  "purpose": "Post-release cache-control repair only; original pre-test freeze and test results remain unchanged. No model, feature, scenario, or fitting changes.",
+  "selection_freeze_sha256": "4afb9a0198af5459b717a1c5744ca9f1b823c613f6aa86a4440cd516abacdb1c",
+  "test_release_sha256": "313bfde76e596defb353357f19c7399f033810bffb1253ec4e7222a5b47bc8f5",
+  "original_source_sha256": "d212553a3d42ed5d16cb67cebca60263dd90302f049308c15cd2d16f9884f43b",
+  "revised_source_sha256": "bf5c331781879e85f971961fa6f70c3241cc4e2516770af0cd00bda6f87e46e2",
+  "original_source_snapshot": "reports/runtime_snapshots/holdout-pre-release.py.txt",
+  "change": "A durable release ledger blocks rescoring if aggregate metrics and local prediction checkpoint are both missing."
+}

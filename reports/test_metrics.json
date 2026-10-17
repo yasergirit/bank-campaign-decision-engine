@@ -1,0 +1,64 @@
+{
+  "evaluation_split": "test",
+  "selected_model": "lightgbm_small",
+  "selection_freeze_sha256": "4afb9a0198af5459b717a1c5744ca9f1b823c613f6aa86a4440cd516abacdb1c",
+  "source_csv_sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+  "split_assignment_sha256": "56dded47e041b5046d859c3877831b96f27ac98b86a71ad4574b9ca7a337fd1e",
+  "test_records": 8236,
+  "test_positive_rate": 0.3082807187955318,
+  "model_metrics": {
+    "average_precision": 0.34166422285431086,
+    "roc_auc": 0.5250473169719654,
+    "brier_score": 0.27853666142650946
+  },
+  "dummy_metrics": {
+    "average_precision": 0.3082807187955318,
+    "roc_auc": 0.5,
+    "brier_score": 0.28094426386714794
+  },
+  "scenario": {
+    "capacity": 500,
+    "cost": 3.0,
+    "value": 100.0
+  },
+  "scenario_results": [
+    {
+      "mode": "capacity",
+      "capacity": 500,
+      "selected_count": 500,
+      "expected_subscriptions": 39.67302089656241,
+      "assumed_cost": 1500.0,
+      "assumed_net_value": 2467.302089656241,
+      "observed_subscriptions": 231,
+      "precision": 0.462,
+      "lift": 1.4986341079165026
+    },
+    {
+      "mode": "positive_value",
+      "capacity": 500,
+      "selected_count": 500,
+      "expected_subscriptions": 39.67302089656241,
+      "assumed_cost": 1500.0,
+      "assumed_net_value": 2467.302089656241,
+      "observed_subscriptions": 231,
+      "precision": 0.462,
+      "lift": 1.4986341079165026
+    }
+  ],
+  "random_benchmark": {
+    "capacity": 500,
+    "selected_count": 500,
+    "repetitions": 200,
+    "seed": 42,
+    "observed_mean": 154.065,
+    "observed_p05": 139.95,
+    "observed_p95": 168.04999999999998
+  },
+  "business_rule": {
+    "selected_count": 500,
+    "observed_subscriptions": 372,
+    "precision": 0.744,
+    "lift": 2.413384797164238
+  },
+  "interpretation": "One held-out check after freeze; no retuning. Historical outcomes are not causal campaign effects."
+}

@@ -1,0 +1,44 @@
+{
+  "csv_sha256": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8",
+  "source_url": "https://archive.ics.uci.edu/static/public/222/bank+marketing.zip",
+  "rows": 41188,
+  "columns": 21,
+  "target_counts": {
+    "no": 36548,
+    "yes": 4640
+  },
+  "positive_rate": 0.11265417111780131,
+  "empty_cells": 0,
+  "unknown_counts": {
+    "job": 330,
+    "marital": 80,
+    "education": 1731,
+    "default": 8597,
+    "housing": 990,
+    "loan": 990
+  },
+  "never_previously_contacted": 39673,
+  "full_duplicate_rows_beyond_first": 12,
+  "baseline_duplicate_rows_beyond_first": 24951,
+  "provisional_split_sizes": [
+    24712,
+    8238,
+    8238
+  ],
+  "baseline_unique_profile_overlap": {
+    "train_validation": 2137,
+    "train_test": 1609,
+    "validation_test": 1388
+  },
+  "baseline_features": [
+    "age",
+    "job",
+    "marital",
+    "education",
+    "default",
+    "housing",
+    "loan",
+    "previous",
+    "poutcome"
+  ]
+}

@@ -1,0 +1,6 @@
+# Optional Streamlit component; frozen ML and API dependencies stay unchanged.
+-r requirements-api.in
+-c requirements-api.lock
+streamlit>=1.40,<2
+pandas==3.0.6
+numpy==2.5.4

@@ -1,0 +1,375 @@
+"""Freeze a validation decision, then release one cached held-out evaluation."""
+
+import argparse
+import fcntl
+import json
+import pickle
+from hashlib import sha256
+from io import StringIO
+from pathlib import Path
+
+import pandas as pd
+
+from bank_campaign.comparison import (
+    ARTIFACTS,
+    REPORTS,
+    build_candidates,
+    business_rule_positions,
+    file_hash,
+    random_benchmark,
+    selection_analysis,
+)
+from bank_campaign.data.download import CSV_NAME, verify_manifest
+from bank_campaign.data.split import freeze_splits
+from bank_campaign.data.validate import validate_dataset
+from bank_campaign.evaluate import probability_metrics
+from bank_campaign.features import select_features
+from bank_campaign.policy import campaign_metrics
+
+FREEZE = REPORTS / "selection_freeze.json"
+TEST_REPORT = REPORTS / "test_metrics.json"
+
+
+def verify_frozen_inputs(freeze: dict, *, require_artifact: bool = True) -> None:
+    for name, digest in freeze["source_code_sha256"].items():
+        if file_hash(Path(name)) != digest:
+            raise ValueError(
+                f"Frozen code/config/lockfile changed: {name}. Do not retune against test."
+            )
+    if require_artifact:
+        actual_hash = file_hash(Path(freeze["selected_model_path"]))
+        if actual_hash != freeze["selected_model_sha256"]:
+            ledger_path = ARTIFACTS / "restoration.json"
+            ledger = json.loads(ledger_path.read_text()) if ledger_path.exists() else {}
+            if (
+                ledger.get("selection_freeze_sha256") != file_hash(FREEZE)
+                or ledger.get("restored_model_sha256") != actual_hash
+                or ledger.get("verified_validation_predictions_sha256")
+                != freeze["selected_validation_predictions_sha256"]
+            ):
+                raise ValueError("Frozen model artifact differs; refusing held-out evaluation.")
+    if (
+        require_artifact
+        and file_hash(ARTIFACTS / "selected_validation_predictions.csv")
+        != freeze["selected_validation_predictions_sha256"]
+    ):
+        raise ValueError("Frozen selected validation predictions differ.")
+    if file_hash(REPORTS / "comparison_manifest.json") != freeze["comparison_manifest_sha256"]:
+        raise ValueError("Frozen comparison manifest differs.")
+
+
+def freeze_selection() -> dict:
+    metadata = json.loads((REPORTS / "comparison_manifest.json").read_text())
+    frozen = {
+        "run_id": metadata["run_id"],
+        "selected_model": metadata["selected_model"],
+        "selection_rule": metadata["selection_rule"],
+        "scenario": metadata["config"]["scenario"],
+        "scenario_modes": ["capacity", "positive_value"],
+        "business_rule": metadata["config"]["business_rule"],
+        "random_repetitions": metadata["config"]["random_repetitions"],
+        "seed": metadata["config"]["seed"],
+        "source_code_sha256": metadata["source_code_sha256"],
+        "source_csv_sha256": metadata["source_csv_sha256"],
+        "split_assignment_sha256": metadata["split_assignment_sha256"],
+        "selected_model_path": metadata["selected_model_path"],
+        "selected_model_sha256": metadata["selected_model_sha256"],
+        "selected_validation_predictions_sha256": metadata[
+            "selected_validation_predictions_sha256"
+        ],
+        "comparison_manifest_sha256": file_hash(REPORTS / "comparison_manifest.json"),
+        "dummy_training_probability": metadata["training_positive_rate"],
+        "features": metadata["features"],
+        "test_was_evaluated_at_freeze": False,
+        "policy_note": "No retraining or tuning follows the test release in this experiment.",
+    }
+    verify_frozen_inputs(frozen)
+    content = json.dumps(frozen, indent=2, allow_nan=False) + "\n"
+    if FREEZE.exists():
+        if FREEZE.read_text() != content:
+            raise ValueError("A different selection freeze already exists; it cannot be replaced.")
+    else:
+        if TEST_REPORT.exists():
+            raise ValueError("Test results already exist; cannot create a new pre-test freeze.")
+        FREEZE.write_text(content)
+    return frozen
+
+
+def load_frozen_data(frozen: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
+    data_dir = Path("data/raw")
+    acquisition = verify_manifest(data_dir)
+    if acquisition["files"][CSV_NAME]["sha256"] != frozen["source_csv_sha256"]:
+        raise ValueError("Frozen source dataset hash differs.")
+    frame = validate_dataset(data_dir / CSV_NAME, expected_rows=41188)
+    assignments, manifest = freeze_splits(
+        frame,
+        csv_sha256=frozen["source_csv_sha256"],
+        assignment_path=Path("data/processed/split_assignments.csv"),
+        manifest_path=REPORTS / "split_manifest.json",
+    )
+    if manifest["assignment_sha256"] != frozen["split_assignment_sha256"]:
+        raise ValueError("Frozen split differs.")
+    return frame, assignments
+
+
+def restore_artifacts() -> None:
+    """Rebuild only the recorded model from training; verify validation behavior, not pickle bytes."""
+    if not FREEZE.exists():
+        raise ValueError("A recorded selection freeze is required for restore.")
+    frozen = json.loads(FREEZE.read_text())
+    verify_frozen_inputs(frozen, require_artifact=False)
+    frame, assignments = load_frozen_data(frozen)
+    metadata = json.loads((REPORTS / "comparison_manifest.json").read_text())
+    train_ids = assignments.loc[
+        (assignments["split"] == "train") & assignments["included"], "row_id"
+    ].to_list()
+    validation_ids = assignments.loc[
+        (assignments["split"] == "validation") & assignments["included"], "row_id"
+    ].to_list()
+    training, validation = frame.iloc[train_ids], frame.iloc[validation_ids]
+    model = build_candidates(metadata["config"])[frozen["selected_model"]]
+    model.fit(select_features(training), training["y"].map({"no": 0, "yes": 1}).astype(int))
+    probabilities = model.predict_proba(select_features(validation))[
+        :, list(model.classes_).index(1)
+    ]
+    output = StringIO()
+    pd.DataFrame(
+        {"row_id": validation.index.to_list(), "subscription_probability": probabilities}
+    ).to_csv(output, index=False, float_format="%.12f")
+    content = output.getvalue().encode()
+    if sha256(content).hexdigest() != frozen["selected_validation_predictions_sha256"]:
+        raise ValueError(
+            "Rebuilt validation predictions differ from freeze; use the recorded software/runtime environment."
+        )
+    ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    model_path = Path(frozen["selected_model_path"])
+    model_path.write_bytes(pickle.dumps(model))
+    (ARTIFACTS / "selected_validation_predictions.csv").write_bytes(content)
+    (ARTIFACTS / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    ledger = {
+        "selection_freeze_sha256": file_hash(FREEZE),
+        "restored_model_sha256": file_hash(model_path),
+        "verified_validation_predictions_sha256": sha256(content).hexdigest(),
+        "note": "Training-only deterministic reconstruction; validation probabilities verified to 12 decimal places. No test labels used for fitting or selection.",
+    }
+    (ARTIFACTS / "restoration.json").write_text(json.dumps(ledger, indent=2) + "\n")
+
+
+def evaluate_holdout() -> dict:
+    # POSIX advisory locks are released by the OS even if the process crashes.
+    ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    with (ARTIFACTS / "holdout.lock").open("a") as handle:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ValueError("Another held-out evaluation is active.") from exc
+        try:
+            return _evaluate_holdout_locked()
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def atomic_json(path: Path, value: dict) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary.replace(path)
+
+
+def _evaluate_holdout_locked() -> dict:
+    if not FREEZE.exists():
+        raise ValueError("Freeze model and scenario first: python -m bank_campaign.holdout freeze")
+    frozen = json.loads(FREEZE.read_text())
+    verify_frozen_inputs(frozen)
+    frame, assignments = load_frozen_data(frozen)
+    freeze_digest = file_hash(FREEZE)
+    prediction_cache = ARTIFACTS / "test_prediction_cache.json"
+    completion_ledger_path = REPORTS / "test_release.json"
+    if TEST_REPORT.exists():
+        cached = json.loads(TEST_REPORT.read_text())
+        if cached["selection_freeze_sha256"] != freeze_digest:
+            raise ValueError("Cached test results belong to a different freeze.")
+        if completion_ledger_path.exists():
+            ledger = json.loads(completion_ledger_path.read_text())
+            if ledger["selection_freeze_sha256"] != freeze_digest or ledger[
+                "test_metrics_sha256"
+            ] != file_hash(TEST_REPORT):
+                raise ValueError("Cached test metrics differ from the recorded release.")
+            if prediction_cache.exists() and ledger["prediction_cache_sha256"] != file_hash(
+                prediction_cache
+            ):
+                raise ValueError("Cached test predictions differ from the recorded release.")
+            write_test_report(cached)
+            return cached
+        if not prediction_cache.exists():
+            raise ValueError(
+                "Incomplete cached release: no completion ledger or verified predictions."
+            )
+        # Interrupted completion: derive metrics from the checkpoint, not unverified JSON.
+    test = frame.iloc[
+        assignments.loc[
+            (assignments["split"] == "test") & assignments["included"], "row_id"
+        ].to_list()
+    ]
+    attempt_marker = ARTIFACTS / "test_attempt.json"
+    if prediction_cache.exists():
+        if completion_ledger_path.exists():
+            ledger = json.loads(completion_ledger_path.read_text())
+            if ledger["prediction_cache_sha256"] != file_hash(prediction_cache):
+                raise ValueError("Cached test predictions differ from the recorded release.")
+        cache = json.loads(prediction_cache.read_text())
+        payload = {"row_ids": cache["row_ids"], "probabilities": cache["probabilities"]}
+        payload_hash = sha256(
+            json.dumps(payload, sort_keys=True, allow_nan=False).encode()
+        ).hexdigest()
+        if (
+            cache["selection_freeze_sha256"] != freeze_digest
+            or payload_hash != cache["payload_sha256"]
+            or cache["row_ids"] != test.index.to_list()
+        ):
+            raise ValueError("Held-out prediction checkpoint differs from the frozen run.")
+        probabilities = cache["probabilities"]
+    else:
+        if attempt_marker.exists():
+            raise ValueError(
+                "Interrupted test attempt without verified prediction cache; inspect before any rescore."
+            )
+        atomic_json(attempt_marker, {"selection_freeze_sha256": freeze_digest})
+        with Path(frozen["selected_model_path"]).open("rb") as handle:
+            model = pickle.load(handle)
+        probabilities = model.predict_proba(select_features(test))[
+            :, list(model.classes_).index(1)
+        ].tolist()
+        payload = {"row_ids": test.index.to_list(), "probabilities": probabilities}
+        atomic_json(
+            prediction_cache,
+            {
+                **payload,
+                "selection_freeze_sha256": freeze_digest,
+                "payload_sha256": sha256(
+                    json.dumps(payload, sort_keys=True, allow_nan=False).encode()
+                ).hexdigest(),
+            },
+        )
+    labels = test["y"].map({"no": 0, "yes": 1}).astype(int)
+    scenarios = []
+    for mode in frozen["scenario_modes"]:
+        result, selected = selection_analysis(test, probabilities, frozen["scenario"], mode=mode)
+        scenarios.append(result)
+        selected.to_csv(ARTIFACTS / f"test_selection_{mode}.csv", index=False)
+    random_result = random_benchmark(
+        labels,
+        capacity=frozen["scenario"]["capacity"],
+        repetitions=frozen["random_repetitions"],
+        seed=frozen["seed"],
+    )
+    rule_result = campaign_metrics(
+        labels, business_rule_positions(test, frozen["scenario"]["capacity"])
+    )
+    result = {
+        "evaluation_split": "test",
+        "selected_model": frozen["selected_model"],
+        "selection_freeze_sha256": freeze_digest,
+        "source_csv_sha256": frozen["source_csv_sha256"],
+        "split_assignment_sha256": frozen["split_assignment_sha256"],
+        "test_records": len(test),
+        "test_positive_rate": float(labels.mean()),
+        "model_metrics": probability_metrics(labels, probabilities),
+        "dummy_metrics": probability_metrics(
+            labels, [frozen["dummy_training_probability"]] * len(test)
+        ),
+        "scenario": frozen["scenario"],
+        "scenario_results": scenarios,
+        "random_benchmark": random_result,
+        "business_rule": rule_result,
+        "interpretation": "One held-out check after freeze; no retuning. Historical outcomes are not causal campaign effects.",
+    }
+    pd.DataFrame(
+        {"row_id": test.index.to_list(), "subscription_probability": probabilities}
+    ).to_csv(ARTIFACTS / "test_predictions.csv", index=False)
+    atomic_json(TEST_REPORT, result)
+    atomic_json(
+        completion_ledger_path,
+        {
+            "selection_freeze_sha256": freeze_digest,
+            "test_metrics_sha256": file_hash(TEST_REPORT),
+            "prediction_cache_sha256": file_hash(prediction_cache),
+        },
+    )
+    write_test_report(result)
+    return result
+
+
+def write_test_report(result: dict) -> None:
+    lines = [
+        "# Stage 4 — frozen held-out evaluation",
+        "",
+        f"Frozen selected model: **{result['selected_model']}**. Test records: {result['test_records']:,}.",
+        f"Test subscription prevalence: {result['test_positive_rate']:.2%}.",
+        "The selection freeze existed before scoring this partition. This result does not change the selected model or policy.",
+        "The fitted model is the training-only candidate; no train+validation refit was performed.",
+        "",
+        "| Estimator | Average Precision ↑ | ROC-AUC ↑ | Brier ↓ |",
+        "|---|---:|---:|---:|",
+    ]
+    for name, metrics in (
+        (result["selected_model"], result["model_metrics"]),
+        ("training-prior reference", result["dummy_metrics"]),
+    ):
+        lines.append(
+            f"| {name} | {metrics['average_precision']:.6f} | {metrics['roc_auc']:.6f} | {metrics['brier_score']:.6f} |"
+        )
+    lines += [
+        "",
+        f"Frozen illustrative assumptions: {result['scenario']}.",
+        "",
+        "| Mode | Selected | Historical subscriptions | Precision | Lift | Model-expected subscriptions | Assumed net value |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in result["scenario_results"]:
+        precision = "undefined" if row["precision"] is None else f"{row['precision']:.4f}"
+        lift = "undefined" if row["lift"] is None else f"{row['lift']:.3f}"
+        lines.append(
+            f"| {row['mode']} | {row['selected_count']} | {row['observed_subscriptions']} | {precision} | {lift} | {row['expected_subscriptions']:.2f} | {row['assumed_net_value']:.2f} |"
+        )
+    random_row = result["random_benchmark"]
+    lines += [
+        "",
+        f"Random selection: mean {random_row['observed_mean']:.2f} historical subscriptions; 5th/95th selection percentiles {random_row['observed_p05']:.1f}/{random_row['observed_p95']:.1f} ({random_row['repetitions']} repetitions).",
+        f"Fixed prior-history rule: {result['business_rule']['observed_subscriptions']} historical subscriptions at the same capacity.",
+        "",
+        "The random interval describes simulated selection variability, not statistical confidence for model generalization.",
+        "No causal uplift, achieved profit, customer-disjointness or current-bank applicability is established.",
+        "Probabilities were not calibrated. Compare expected counts with historical observed counts before interpreting monetary scenarios.",
+        "This test is now exposed. Further changes require a new experimental validation design, not repeated optimization on this holdout.",
+        "Re-running the evaluate command verifies the freeze and returns cached results without predicting again.",
+        "",
+    ]
+    (REPORTS / "test_report.md").write_text("\n".join(lines))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=["freeze", "evaluate", "restore"])
+    args = parser.parse_args()
+    try:
+        if args.action == "restore":
+            restore_artifacts()
+            print(
+                "Recorded model restored from training; frozen validation predictions verified. Test not rescored."
+            )
+            return
+        result = freeze_selection() if args.action == "freeze" else evaluate_holdout()
+    except (ValueError, OSError, KeyError) as exc:
+        parser.exit(1, f"Holdout failed: {exc}\n")
+    if args.action == "freeze":
+        state = (
+            "test results already released" if TEST_REPORT.exists() else "test has not been scored"
+        )
+        print(f"Frozen model: {result['selected_model']}; {state}.")
+    else:
+        print(json.dumps(result["model_metrics"], indent=2))
+        print("Frozen test results: reports/test_report.md")
+
+
+if __name__ == "__main__":
+    main()

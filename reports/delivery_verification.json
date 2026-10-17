@@ -1,0 +1,90 @@
+{
+  "verified_at_utc": "2026-10-17T10:07:06.696698+00:00",
+  "scope": "Stage8 local preparation and comprehensive Turkish report before GitHub publication",
+  "report": {
+    "markdown": "reports/proje_raporu.md",
+    "pdf": "reports/proje_raporu.pdf",
+    "pages": 28,
+    "sections": 20,
+    "sha256": "66c9af4d82816d66cc4b0b688d7accb3a9bcd7825cfb5da54445c196612a168e",
+    "render_review": "Cover, contents, architecture, tables, results and final delivery page visually inspected; all text stays within page boundaries."
+  },
+  "checks": {
+    "full_local_pytest": {
+      "passed": 269,
+      "postgresql_included": true,
+      "warnings": 1
+    },
+    "model_free_source_copy_pytest": {
+      "passed": 261,
+      "deselected_db_tests": 8,
+      "no_model_raw_or_env": true,
+      "environment": "Existing locked local venv; not a separately fresh Python install"
+    },
+    "ruff_lint": "34 files clean",
+    "ruff_format": "34 files clean",
+    "mypy": "22 files clean",
+    "compose_config": "valid",
+    "uv_lock_check": "passed",
+    "git_diff_check": "passed",
+    "frozen_ml_inputs": "verified unchanged"
+  },
+  "docker": {
+    "image": "sha256:0c794cf9b2ff0d8a7bd09262b86eef16a7dc917da06687df04c5eebda80f6044 linux/arm64",
+    "api_url": "http://127.0.0.1:18000",
+    "ui_url": "http://127.0.0.1:18502",
+    "healthy": [
+      "api",
+      "ui",
+      "db"
+    ],
+    "runtime_packages_compatible": 50,
+    "image_excludes": [
+      "artifacts",
+      "reports",
+      ".env",
+      "data/raw"
+    ],
+    "runtime_mounts": "artifacts/reports read-only",
+    "smoke": {
+      "exact_artifact_sha": true,
+      "deterministic_synthetic_records": 3,
+      "selected": 2,
+      "zero_capacity_empty": true,
+      "positive_value_empty": true,
+      "csv_order_parity": true,
+      "ui_health": "ok"
+    }
+  },
+  "publication": {
+    "github_repository_created": false,
+    "push": false,
+    "commit": false,
+    "public_deployment": false,
+    "remote_github_actions_run": false,
+    "workflow_prepared": true
+  },
+  "limitations": [
+    "Actual-model serving needs trusted local exact-hash artifact outside Git/image.",
+    "Clean-source fixture tests do not reproduce the full original training run.",
+    "No new training, test scoring or model tuning was performed.",
+    "Remote CI is prepared but has not been executed.",
+    "Existing Starlette TestClient deprecation warning remains."
+  ],
+  "source_sha256": {
+    "Dockerfile": "f49813f56753ce7d3b621d0806fbde8b9a55eae320ed59fc2cb15a9893aa2320",
+    ".dockerignore": "b81f9f314d10a2424ea87d89cceb42cf7d7ab02fb027e11a2c21edc8e64fd100",
+    "compose.yaml": "ec9627dcae09e9825361016f6b64864063a25f984c07ce8e06f81800bc4ef595",
+    "Makefile": "98cb4b99808bb2988be312b387958443c3dac476edf5f186af0414da5b656c44",
+    ".github/workflows/ci.yml": "04693a35862af5c87d4dedeac6afa3ca3fbed6d603b6371de20a8b8450250b10",
+    "scripts/verify_serving.py": "008dbb5d164a202998a56290ffd33272e75447d405d072fc9912c5f8b26850ca",
+    "requirements-container.lock": "1d85e9b23c4f2f6c7f19c628b3bb73da19e2bc0c98957209cc1164fced157ca7",
+    "reports/proje_raporu.md": "18ea7127c473c73277be8f44626fa781aa30af4b5929432b53bdf72f02636b34",
+    "reports/proje_raporu.pdf": "66c9af4d82816d66cc4b0b688d7accb3a9bcd7825cfb5da54445c196612a168e"
+  },
+  "preserved_locks": {
+    "uv.lock": "5d743ea81533e171c76af3a9dca2576a96fd560d0bed10ed41fdf5ccc4e70f98",
+    "requirements-api.lock": "39a22784db08d084b3725f9ad2b5521c1955877b2be2dd5d646f1f17f17e292e",
+    "requirements-ui.lock": "aff3dda93de03bc6c8c7b098dacab4eb3c5be22a6eba0cc0d2cad3c889eaece3"
+  }
+}

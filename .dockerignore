@@ -1,0 +1,33 @@
+.git
+.github
+.idea
+.omx
+.venv
+__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+build
+dist
+work
+
+# Runtime-only or sensitive inputs must never enter an image layer.
+.env
+.env.*
+artifacts
+data/raw
+data/processed
+reports
+
+# Development-only material.
+tests
+docs
+sql
+compose.yaml
+DESIGN.md
+PRODUCT.md
+main.py

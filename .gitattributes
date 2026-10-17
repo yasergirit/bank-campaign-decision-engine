@@ -1,0 +1,6 @@
+# Preserve report/image bytes and meaningful Markdown hard line breaks.
+*.pdf binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.md whitespace=-blank-at-eol
