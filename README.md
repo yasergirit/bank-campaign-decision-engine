@@ -1,7 +1,5 @@
 # Bank Campaign Decision Engine
 
-[![CI](https://github.com/yasergirit/bank-campaign-decision-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/yasergirit/bank-campaign-decision-engine/actions/workflows/ci.yml)
-
 An end-to-end decision-system portfolio project: validate bank marketing data,
 freeze an auditable experiment, rank candidates under campaign constraints, and
 serve the result through PostgreSQL, FastAPI, and Streamlit.
@@ -15,7 +13,7 @@ serve the result through PostgreSQL, FastAPI, and Streamlit.
 - Validation-based model selection with artifact and environment provenance.
 - A capacity and expected-value policy with deterministic tie-breaking.
 - SQL/Python feature parity across all 41,188 source rows.
-- Strict FastAPI contracts, a decision workspace, Docker, and GitHub Actions.
+- Strict FastAPI contracts, a decision workspace, and Docker.
 - Honest reporting when a simple business rule beats the selected ML model.
 
 ## Measured result
@@ -104,10 +102,10 @@ make db-test
 docker compose down
 ```
 
-GitHub Actions repeats static checks, artifact-free tests, an image build, and
-isolated PostgreSQL integration tests. It receives neither the trained model nor
-the raw dataset. Exact serving is verified separately against the hash-pinned
-release artifact.
+These commands run static checks, artifact-free tests, an image build, and
+isolated PostgreSQL integration tests. The trained model and raw dataset stay
+outside the repository. Exact serving is verified separately against the
+hash-pinned release artifact.
 
 ## Reproduce or inspect
 
